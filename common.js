@@ -7,6 +7,7 @@ exports.finish = finish
 exports.mark = mark
 exports.isIgnored = isIgnored
 exports.childrenIgnored = childrenIgnored
+exports.handleUNCPath = handleUNCPath
 
 function ownProp (obj, field) {
   return Object.prototype.hasOwnProperty.call(obj, field)
@@ -97,8 +98,10 @@ function setopts (self, pattern, options) {
 
   self.root = options.root || path.resolve(self.cwd, "/")
   self.root = path.resolve(self.root)
-  if (process.platform === "win32")
+  if (process.platform === "win32") {
     self.root = self.root.replace(/\\/g, "/")
+    pattern = handleUNCPath(pattern)
+  }
 
   self.nomount = !!options.nomount
 
@@ -241,4 +244,11 @@ function childrenIgnored (self, path) {
   return self.ignore.some(function(item) {
     return !!(item.gmatcher && item.gmatcher.match(path))
   })
+}
+
+function handleUNCPath(path) {
+  if (!isAbsolute.win32(path)) { return path; }
+
+  var matches = path.match(/^([a-zA-Z]:|[\\\/]{2}[^\\\/]+[\\\/]+[^\\\/]+)?([\\\/])?([\s\S]*?)$/)
+  return matches[2] + matches[3];
 }
