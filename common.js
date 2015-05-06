@@ -63,6 +63,12 @@ function setopts (self, pattern, options) {
   }
 
   self.pattern = pattern
+
+  self.platform = options.platform || process.platform
+  self.isAbsolute = isAbsolute[self.platform] || isAbsolute
+  self.resolve = (path[self.platform] || path).resolve
+  self.sep = (path[self.platform] || path).sep;
+
   self.strict = options.strict !== false
   self.realpath = !!options.realpath
   self.realpathCache = options.realpathCache || Object.create(null)
@@ -98,9 +104,9 @@ function setopts (self, pattern, options) {
 
   self.root = options.root || path.resolve(self.cwd, "/")
   self.root = path.resolve(self.root)
-  if (process.platform === "win32") {
+  if (self.platform === "win32") {
     self.root = self.root.replace(/\\/g, "/")
-    pattern = handleUNCPath(pattern)
+    pattern = handleUNCPath(self.isAbsolute, pattern)
   }
 
   self.nomount = !!options.nomount
@@ -215,7 +221,7 @@ function makeAbs (self, f) {
   var abs = f
   if (f.charAt(0) === '/') {
     abs = path.join(self.root, f)
-  } else if (isAbsolute(f) || f === '') {
+  } else if (self.isAbsolute(f) || f === '') {
     abs = f
   } else if (self.changedCwd) {
     abs = path.resolve(self.cwd, f)
@@ -246,8 +252,8 @@ function childrenIgnored (self, path) {
   })
 }
 
-function handleUNCPath(path) {
-  if (!isAbsolute.win32(path)) { return path; }
+function handleUNCPath(isAbsolute, path) {
+  if (!isAbsolute(path)) { return path; }
 
   var matches = path.match(/^([a-zA-Z]:|[\\\/]{2}[^\\\/]+[\\\/]+[^\\\/]+)?([\\\/])?([\s\S]*?)$/)
   return matches[2] + matches[3];

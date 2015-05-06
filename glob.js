@@ -644,13 +644,13 @@ Glob.prototype._processSimple2 = function (prefix, index, er, exists, cb) {
     if (prefix.charAt(0) === '/') {
       prefix = path.join(this.root, prefix)
     } else {
-      prefix = path.resolve(this.root, prefix)
+      prefix = this.resolve(this.root, prefix)
       if (trail)
         prefix += '/'
     }
   }
 
-  if (process.platform === 'win32')
+  if (this.platform === 'win32')
     prefix = prefix.replace(/\\/g, '/')
 
   // Mark this as a match

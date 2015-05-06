@@ -18,15 +18,16 @@ function stubPlatform(platform, fn) {
 }
 
 test("unit test – setopts – ensure UNC paths are handled correctly", function (t) {
-  var sentinel = { };
 
   stubPlatform("win32", function() {
-    setopts(sentinel, "\\\\vmware-host\\Shared Folders\\-folder\\*")
+    var sentinel = { }
+    setopts(sentinel, "\\\\vmware-host\\Shared Folders\\-folder\\*", { platform: 'win32' })
     t.same(sentinel.minimatch.pattern, "\\-folder\\\*")
   })
 
   stubPlatform("darwin", function() {
-    setopts(sentinel, "\\\\vmware-host\\Shared Folders\\-folder\\*")
+    var sentinel = { }
+    setopts(sentinel, "\\\\vmware-host\\Shared Folders\\-folder\\*", { platform: 'darwin' })
     t.same(sentinel.minimatch.pattern, "\\\\vmware-host\\Shared Folders\\-folder\\*")
   })
 
